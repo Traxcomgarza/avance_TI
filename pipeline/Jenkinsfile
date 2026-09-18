@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    environment {
+        TARGET_URL = 'http://localhost:5000'
+    }
+
+    stages {
+        stage('Secretos') {
+            steps { sh 'bash pipeline/01_secrets_scan.sh' }
+        }
+        stage('SCA') {
+            steps { sh 'bash pipeline/02_sca_scan.sh' }
+        }
+        stage('SAST') {
+            steps { sh 'bash pipeline/03_sast_scan.sh' }
+        }
+        stage('IaC') {
+            steps { sh 'bash pipeline/04_iac_scan.sh' }
+        }
+        stage('Imagen de contenedor') {
+            steps { sh 'bash pipeline/05_container_scan.sh' }
+        }
+        stage('SBOM') {
+            steps { sh 'bash pipeline/06_sbom_generate.sh' }
+        }
+        stage('Levantar app para DAST') {
+            steps { sh 'docker compose up -d' }
+        }
+        stage('DAST') {
+            steps { sh 'bash pipeline/07_dast_scan.sh "${TARGET_URL}"' }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker compose down || true'
+            archiveArtifacts artifacts: 'reportes/*.json', allowEmptyArchive: true
+        }
+        success {
+            echo 'DESPLIEGUE PERMITIDO'
+        }
+        failure {
+            echo 'DESPLIEGUE BLOQUEADO'
+        }
+    }
+}

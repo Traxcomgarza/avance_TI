@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Facebook2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="bg-mesh" aria-hidden="true">
+    <span class="blob blob-a"></span>
+    <span class="blob blob-b"></span>
+    <span class="blob blob-c"></span>
+  </div>
+
+  <nav class="nav-glass">
+    <a class="brand" href="{{ '/feed' if username else '/login' }}">✦ Facebook2</a>
+    <div class="nav-links">
+      {% if username %}
+        <a href="{{ url_for('feed') }}">Feed</a>
+        <a href="{{ url_for('usuarios') }}">Descubrir</a>
+        <a href="{{ url_for('profile', username=username) }}">@{{ username }}</a>
+        <form action="{{ url_for('logout') }}" method="post" style="display:inline">
+          <button type="submit">Salir</button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('login') }}">Entrar</a>
+        <a href="{{ url_for('register') }}">Registrarse</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

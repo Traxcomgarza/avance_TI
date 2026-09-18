@@ -1,0 +1,17 @@
+.env
+__pycache__/
+*.pyc
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+terraform.tfvars
+venv/
+.DS_Store
+reportes/01_secrets.json
+reportes/02_sca.json
+reportes/03_sast.json
+reportes/04_iac.json
+reportes/05_container.json
+reportes/07_dast.json
+reportes/zap.yaml

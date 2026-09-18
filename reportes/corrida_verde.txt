@@ -1,0 +1,228 @@
+[19:19:27] === Iniciando pipeline: red-social-corta ===
+[19:19:27] Etapa 1/7: Secretos (gitleaks) — umbral: 0 hallazgos
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+[90m7:19PM[0m [32mINF[0m [1m1 commits scanned.[0m
+[90m7:19PM[0m [32mINF[0m [1mscanned ~1632886 bytes (1.63 MB) in 863ms[0m
+[90m7:19PM[0m [32mINF[0m [1mno leaks found[0m
+[19:19:28] Hallazgos de secretos: 0
+[19:19:28] PASA: sin secretos por encima del umbral
+  -> OK: 01_secrets_scan.sh
+[19:19:28] Etapa 2/7: SCA (pip-audit) — bloquea con: CRITICAL,HIGH
+No known vulnerabilities found
+[19:19:36] Vulnerabilidades con parche disponible: 0
+[19:19:36] PASA: sin vulnerabilidades bloqueantes en dependencias
+  -> OK: 02_sca_scan.sh
+[19:19:36] Etapa 3/7: SAST (bandit) — bloquea con severidad: HIGH+
+[main]	INFO	profile include tests: None
+[main]	INFO	profile exclude tests: None
+[main]	INFO	cli include tests: None
+[main]	INFO	cli exclude tests: None
+[json]	INFO	JSON output written to file: /home/ec2-user/reto-avance2/reportes/03_sast.json
+[19:19:36] Hallazgos HIGH/CRITICAL: 0
+[19:19:36] PASA: sin hallazgos SAST bloqueantes
+  -> OK: 03_sast_scan.sh
+[19:19:36] Etapa 4/7: IaC (checkov) — bloquea con severidad: cualquier check fallido (checkov OSS no expone severidad)
+{
+    "check_type": "terraform",
+    "results": {
+        "failed_checks": []
+    },
+    "summary": {
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "parsing_errors": 0,
+        "resource_count": 3,
+        "checkov_version": "3.3.18"
+    }
+}
+[19:19:38] PASA: infraestructura como código sin hallazgos bloqueantes
+  -> OK: 04_iac_scan.sh
+[19:19:38] Etapa 5/7: Imagen de contenedor (trivy) — bloquea con: CRITICAL,HIGH
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 928B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 1.36kB done
+#5 DONE 0.0s
+
+#6 [6/8] RUN pip install --no-cache-dir -r requirements.txt
+#6 CACHED
+
+#7 [2/8] RUN apt-get update     && apt-get upgrade -y     && apt-get install -y --no-install-recommends libpq-dev gcc curl     && rm -rf /var/lib/apt/lists/*
+#7 CACHED
+
+#8 [7/8] COPY app/ .
+#8 CACHED
+
+#9 [4/8] WORKDIR /app
+#9 CACHED
+
+#10 [5/8] COPY app/requirements.txt .
+#10 CACHED
+
+#11 [3/8] RUN groupadd -r appgroup && useradd -r -g appgroup -d /app -s /sbin/nologin appuser
+#11 CACHED
+
+#12 [8/8] RUN chown -R appuser:appgroup /app
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 writing image sha256:8113bd9be89dbdb545159dc58ad87e96aed4929da8837d9aeb8b47df1396e973 done
+#13 naming to docker.io/library/red-social-corta-web:pipeline done
+#13 DONE 0.0s
+2026-09-17T19:19:39Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-09-17T19:19:39Z	INFO	[secret] Secret scanning is enabled
+2026-09-17T19:19:39Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2026-09-17T19:19:39Z	INFO	[secret] Please see https://trivy.dev/docs/v0.74/guide/scanner/secret#recommendation for faster secret detection
+2026-09-17T19:19:39Z	INFO	Detected OS	family="debian" version="12.15"
+2026-09-17T19:19:39Z	INFO	[debian] Detecting vulnerabilities...	os_version="12" pkg_num=143
+2026-09-17T19:19:39Z	INFO	Number of language-specific files	num=1
+2026-09-17T19:19:39Z	INFO	[python-pkg] Detecting vulnerabilities...
+2026-09-17T19:19:39Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.74/guide/scanner/vulnerability#severity-selection for details.
+[19:19:39] Vulnerabilidades CRITICAL,HIGH en la imagen: 0
+[19:19:39] PASA: imagen sin vulnerabilidades bloqueantes
+  -> OK: 05_container_scan.sh
+[19:19:39] Etapa 6/7: Generación de SBOM (syft, formato CycloneDX)
+[19:19:49] PASA: SBOM generado en /home/ec2-user/reto-avance2/reportes/sbom_cyclonedx.json
+  -> OK: 06_sbom_generate.sh
+[19:19:49] Etapa 7/7: DAST (ZAP baseline) contra http://localhost:5000 — umbral: 0 alertas altas
+Using the Automation Framework
+Total of 28 URLs
+PASS: Vulnerable JS Library (Powered by Retire.js) [10003]
+PASS: In Page Banner Information Leak [10009]
+PASS: Cookie No HttpOnly Flag [10010]
+PASS: Cookie Without Secure Flag [10011]
+PASS: Re-examine Cache-control Directives [10015]
+PASS: Cross-Domain JavaScript Source File Inclusion [10017]
+PASS: Content-Type Header Missing [10019]
+PASS: Information Disclosure - Debug Error Messages [10023]
+PASS: Information Disclosure - Sensitive Information in URL [10024]
+PASS: Information Disclosure - Sensitive Information in HTTP Referrer Header [10025]
+PASS: HTTP Parameter Override [10026]
+PASS: Information Disclosure - Suspicious Comments [10027]
+PASS: Off-site Redirect [10028]
+PASS: Cookie Poisoning [10029]
+PASS: User Controllable Charset [10030]
+PASS: User Controllable HTML Element Attribute (Potential XSS) [10031]
+PASS: Viewstate [10032]
+PASS: Directory Browsing [10033]
+PASS: Heartbleed OpenSSL Vulnerability (Indicative) [10034]
+PASS: Strict-Transport-Security Header [10035]
+PASS: HTTP Server Response Header [10036]
+PASS: Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s) [10037]
+PASS: X-Backend-Server Header Information Leak [10039]
+PASS: Secure Pages Include Mixed Content [10040]
+PASS: HTTP to HTTPS Insecure Transition in Form Post [10041]
+PASS: HTTPS to HTTP Insecure Transition in Form Post [10042]
+PASS: User Controllable JavaScript Event (XSS) [10043]
+PASS: Big Redirect Detected (Potential Sensitive Information Leak) [10044]
+PASS: Retrieved from Cache [10050]
+PASS: X-ChromeLogger-Data (XCOLD) Header Information Leak [10052]
+PASS: CSP [10055]
+PASS: X-Debug-Token Information Leak [10056]
+PASS: Username Hash Found [10057]
+PASS: X-AspNet-Version Response Header [10061]
+PASS: PII Disclosure [10062]
+PASS: Hash Disclosure [10097]
+PASS: Cross-Domain Misconfiguration [10098]
+PASS: Source Code Disclosure [10099]
+PASS: Weak Authentication Method [10105]
+PASS: Reverse Tabnabbing [10108]
+PASS: Modern Web Application [10109]
+PASS: Dangerous JS Functions [10110]
+PASS: Verification Request Identified [10113]
+PASS: Script Served From Malicious Domain (polyfill) [10115]
+PASS: ZAP is Out of Date [10116]
+PASS: Private IP Disclosure [2]
+PASS: Session ID in URL Rewrite [3]
+PASS: Script Passive Scan Rules [50001]
+PASS: Stats Passive Scan Rule [50003]
+PASS: Insecure JSF ViewState [90001]
+PASS: Java Serialization Object [90002]
+PASS: Charset Mismatch [90011]
+PASS: Application Error Disclosure [90022]
+PASS: WSDL File Detection [90030]
+PASS: Loosely Scoped Cookie [90033]
+WARN-NEW: Missing Anti-clickjacking Header [10020] x 4 
+	http://localhost:5000/feed (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/register (200 OK)
+WARN-NEW: X-Content-Type-Options Header Missing [10021] x 5 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/static/style.css (200 OK)
+	http://localhost:5000/register (200 OK)
+WARN-NEW: Content Security Policy (CSP) Header Not Set [10038] x 5 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/robots.txt (404 Not Found)
+	http://localhost:5000/sitemap.xml (404 Not Found)
+WARN-NEW: Non-Storable Content [10049] x 8 
+	http://localhost:5000 (302 Found)
+	http://localhost:5000/login (302 Found)
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+WARN-NEW: Cookie without SameSite Attribute [10054] x 1 
+	http://localhost:5000/login (302 Found)
+WARN-NEW: Permissions Policy Header Not Set [10063] x 5 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/robots.txt (404 Not Found)
+	http://localhost:5000/sitemap.xml (404 Not Found)
+WARN-NEW: Timestamp Disclosure - Unix [10096] x 1 
+	http://localhost:5000/u/brandon (200 OK)
+WARN-NEW: Authentication Request Identified [10111] x 1 
+	http://localhost:5000/login (302 Found)
+WARN-NEW: Session Management Response Identified [10112] x 1 
+	http://localhost:5000/login (302 Found)
+WARN-NEW: Absence of Anti-CSRF Tokens [10202] x 5 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/feed (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/register (200 OK)
+WARN-NEW: Sub Resource Integrity Attribute Missing [90003] x 5 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/usuarios (200 OK)
+	http://localhost:5000/register (200 OK)
+WARN-NEW: Cross-Origin-Embedder-Policy Header Missing or Invalid [90004] x 13 
+	http://localhost:5000 (200 OK)
+	http://localhost:5000/login (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000/register (200 OK)
+	http://localhost:5000 (200 OK)
+FAIL-NEW: 0	FAIL-INPROG: 0	WARN-NEW: 12	WARN-INPROG: 0	INFO: 0	IGNORE: 0	PASS: 55
+[19:20:32] Alertas de riesgo alto: 0
+[19:20:32] PASA: sin alertas DAST bloqueantes
+  -> OK: 07_dast_scan.sh
+
+[19:20:32] === Veredicto final ===
+[19:20:32] DESPLIEGUE PERMITIDO — todas las etapas pasaron sus umbrales

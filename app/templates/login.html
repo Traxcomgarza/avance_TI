@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="auth-card glass">
+  <h1>Inicia sesión</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="post">
+    <input type="text" name="username" placeholder="usuario" required>
+    <input type="password" name="password" placeholder="contraseña" required>
+    <button type="submit" class="btn-primary">Entrar</button>
+  </form>
+  <p class="auth-switch">¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
+</section>
+{% endblock %}

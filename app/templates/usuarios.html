@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Descubrir</h1>
+
+<div class="search-bar">
+  <input type="text" id="search-input" placeholder="Buscar por usuario..." autocomplete="off">
+</div>
+
+<ul class="user-list" id="user-list">
+  {% for u in users %}
+  <li class="user-row glass">
+    <span class="avatar" style="--hue: {{ avatar_hue(u.username) }}">{{ u.username[0]|upper }}</span>
+    <a href="/u/{{ u.username }}">@{{ u.username }}</a>
+    <form method="post" action="/follow/{{ u.username }}">
+      <button type="submit" class="btn-secondary">{{ "Dejar de seguir" if u.is_following else "Seguir" }}</button>
+    </form>
+  </li>
+  {% else %}
+  <li class="empty-state glass">No se encontraron usuarios.</li>
+  {% endfor %}
+</ul>
+
+<script>
+function hueFromUsername(username) {
+  let hash = 0;
+  for (let i = 0; i < username.length; i++) {
+    hash = (hash * 31 + username.charCodeAt(i)) % 360;
+  }
+  return Math.abs(hash);
+}
+
+function renderUsers(users) {
+  const list = document.getElementById('user-list');
+  if (users.length === 0) {
+    list.innerHTML = '<li class="empty-state glass">No se encontraron usuarios.</li>';
+    return;
+  }
+  list.innerHTML = users.map(u => `
+    <li class="user-row glass">
+      <span class="avatar" style="--hue: ${hueFromUsername(u.username)}">${u.username[0].toUpperCase()}</span>
+      <a href="/u/${u.username}">@${u.username}</a>
+      <form method="post" action="/follow/${u.username}">
+        <button type="submit" class="btn-secondary">${u.is_following ? "Dejar de seguir" : "Seguir"}</button>
+      </form>
+    </li>
+  `).join('');
+}
+
+let debounceTimer;
+document.getElementById('search-input').addEventListener('input', (e) => {
+  clearTimeout(debounceTimer);
+  const q = e.target.value;
+  debounceTimer = setTimeout(() => {
+    fetch(`/usuarios/buscar?q=${encodeURIComponent(q)}`)
+      .then(res => res.json())
+      .then(renderUsers);
+  }, 250);
+});
+</script>
+{% endblock %}

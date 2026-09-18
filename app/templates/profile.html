@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="profile-header glass">
+  <span class="avatar avatar-lg" style="--hue: {{ avatar_hue(profile_user.username) }}">{{ profile_user.username[0]|upper }}</span>
+  <h1>@{{ profile_user.username }}</h1>
+  {% if username and username != profile_user.username %}
+  <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
+    <button type="submit" class="btn-primary">{{ "Dejar de seguir" if is_following else "Seguir" }}</button>
+  </form>
+  {% endif %}
+</section>
+
+<ul class="feed-list">
+  {% for post in posts %}
+  <li class="post glass">
+    <p class="post-content">{{ post.content }}</p>
+    {% if post.image_url %}<img src="{{ post.image_url }}" class="post-image">{% endif %}
+    <div class="post-meta">
+      <span>{{ post.created_at|fecha }}</span>
+      <span>♥ {{ post.likes }}</span>
+    </div>
+  </li>
+  {% else %}
+  <li class="empty-state glass">Aún no hay publicaciones.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

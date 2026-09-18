@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+{# <span class="feed-badge">{{ "servido desde caché" if source == "cache" else "servido desde base de datos" }}</span> #}
+
+<section class="composer glass">
+  <form method="post" action="{{ url_for('create_post') }}" enctype="multipart/form-data">
+    <textarea name="content" maxlength="280" placeholder="¿Qué está pasando?" required></textarea>
+    <div class="composer-row">
+      <label class="file-chip">
+        <input type="file" name="image" accept="image/*" id="image-input" onchange="previewImage(event)">
+        Añadir imagen
+      </label>
+      <button type="submit" class="btn-primary">Publicar</button>
+    </div>
+    <img id="image-preview" class="post-image" style="display:none">
+  </form>
+</section>
+
+<ul class="feed-list">
+  {% for post in posts %}
+  <li class="post glass">
+    <div class="post-head">
+      <span class="avatar" style="--hue: {{ avatar_hue(post.username) }}">{{ post.username[0]|upper }}</span>
+      <div>
+        <a class="post-author" href="{{ url_for('profile', username=post.username) }}">@{{ post.username }}</a>
+        <time class="post-time">{{ post.created_at|fecha }}</time>
+      </div>
+    </div>
+    <p class="post-content">{{ post.content }}</p>
+    {% if post.image_url %}<img src="{{ post.image_url }}" class="post-image">{% endif %}
+    <form method="post" action="{{ url_for('like_post', post_id=post.id) }}" class="like-form" data-post-id="{{ post.id }}">
+      <button type="submit" class="like-btn">♥ <span class="like-count">{{ post.likes }}</span></button>
+    </form>
+  </li>
+  {% else %}
+  <li class="empty-state glass">Tu feed está vacío. Sigue a alguien en Descubrir o publica algo.</li>
+  {% endfor %}
+</ul>
+
+<script>
+function previewImage(event) {
+  const preview = document.getElementById('image-preview');
+  const file = event.target.files[0];
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+}
+
+document.querySelectorAll('.like-form').forEach(form => {
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    fetch(form.action, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'fetch' }
+    })
+      .then(res => res.json())
+      .then(data => {
+        form.querySelector('.like-count').textContent = data.likes;
+      });
+  });
+});
+</script>
+{% endblock %}
