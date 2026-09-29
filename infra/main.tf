@@ -11,6 +11,7 @@ terraform {
 provider "aws" {
   region = var.aws_region
 }
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -36,7 +37,7 @@ data "aws_ami" "amazon_linux" {
 resource "aws_security_group" "app" {
   name        = "${var.project_name}-app-sg"
   description = "SSH y HTTP para las instancias QA y Produccion"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     description = "SSH"
@@ -69,13 +70,13 @@ resource "aws_security_group" "app" {
 # ---------- RDS ----------
 resource "aws_db_subnet_group" "this" {
   name       = "${var.project_name}-db-subnet-group"
-  subnet_ids = var.subnet_ids
+  subnet_ids = data.aws_subnets.default.ids
 }
 
 resource "aws_security_group" "rds" {
   name        = "${var.project_name}-rds-sg"
   description = "Permite Postgres solo desde el SG de las instancias de la app"
-  vpc_id      = var.vpc_id
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     description     = "Postgres desde las instancias de la app"
@@ -170,7 +171,7 @@ resource "aws_instance" "qa" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
   key_name               = var.key_name
-  subnet_id              = var.subnet_ids[0]
+  subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.app.id]
   user_data              = local.user_data
 
@@ -192,7 +193,7 @@ resource "aws_instance" "produccion" {
   ami                    = data.aws_ami.amazon_linux.id
   instance_type          = var.instance_type
   key_name               = var.key_name
-  subnet_id              = var.subnet_ids[0]
+  subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.app.id]
   user_data              = local.user_data
 
