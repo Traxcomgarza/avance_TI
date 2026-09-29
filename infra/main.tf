@@ -33,10 +33,9 @@ data "aws_ami" "amazon_linux" {
   }
 }
 
-# ---------- Security Group de las instancias de la app ----------
 resource "aws_security_group" "app" {
   name        = "${var.project_name}-app-sg"
-  description = "SSH y HTTP para las instancias QA y Produccion"
+  description = "SSH y acceso a la app"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -44,7 +43,7 @@ resource "aws_security_group" "app" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] #checkov:skip=CKV_AWS_24: lab personal AWS Academy, sin IP fija para restringir
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -67,19 +66,13 @@ resource "aws_security_group" "app" {
   }
 }
 
-# ---------- RDS ----------
-resource "aws_db_subnet_group" "this" {
-  name       = "${var.project_name}-db-subnet-group"
-  subnet_ids = data.aws_subnets.default.ids
-}
-
 resource "aws_security_group" "rds" {
   name        = "${var.project_name}-rds-sg"
-  description = "Permite Postgres solo desde el SG de las instancias de la app"
+  description = "Permite Postgres solo desde el SG de la app"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    description     = "Postgres desde las instancias de la app"
+    description     = "Postgres desde la app"
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
@@ -89,6 +82,11 @@ resource "aws_security_group" "rds" {
   tags = {
     Project = var.project_name
   }
+}
+
+resource "aws_db_subnet_group" "this" {
+  name       = "${var.project_name}-db-subnet-group"
+  subnet_ids = data.aws_subnets.default.ids
 }
 
 resource "aws_db_instance" "this" {
@@ -119,7 +117,6 @@ resource "aws_db_instance" "this" {
   }
 }
 
-# ---------- S3 (bucket nuevo, privado y cifrado) ----------
 resource "aws_s3_bucket" "app" {
   bucket = var.bucket_name
 
@@ -128,18 +125,8 @@ resource "aws_s3_bucket" "app" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "app" {
-  bucket = aws_s3_bucket.app.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
 resource "aws_s3_bucket_server_side_encryption_configuration" "app" {
   bucket = aws_s3_bucket.app.id
-
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
@@ -147,33 +134,20 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "app" {
   }
 }
 
-resource "aws_s3_bucket_versioning" "app" {
-  bucket = aws_s3_bucket.app.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-# ---------- EC2: QA y Produccion ----------
-locals {
-  user_data = <<-EOF
-    #!/bin/bash
-    dnf update -y
-    dnf install -y docker git
-    systemctl enable --now docker
-    usermod -aG docker ec2-user
-    curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
-  EOF
+resource "aws_s3_bucket_public_access_block" "app" {
+  bucket                  = aws_s3_bucket.app.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
 resource "aws_instance" "qa" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
+  instance_type          = "t2.micro"
   key_name               = var.key_name
-  subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.app.id]
-  user_data              = local.user_data
+  subnet_id              = data.aws_subnets.default.ids[0]
 
   root_block_device {
     encrypted = true
@@ -181,6 +155,19 @@ resource "aws_instance" "qa" {
 
   metadata_options {
     http_tokens = "required"
+  }
+
+  user_data = <<-USERDATA
+    #!/bin/bash
+    dnf install -y docker git
+    systemctl enable --now docker
+    usermod -aG docker ec2-user
+    curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+  USERDATA
+
+  lifecycle {
+    ignore_changes = [ami]
   }
 
   tags = {
@@ -191,11 +178,10 @@ resource "aws_instance" "qa" {
 
 resource "aws_instance" "produccion" {
   ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
+  instance_type          = "t2.micro"
   key_name               = var.key_name
-  subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.app.id]
-  user_data              = local.user_data
+  subnet_id              = data.aws_subnets.default.ids[0]
 
   root_block_device {
     encrypted = true
@@ -203,6 +189,19 @@ resource "aws_instance" "produccion" {
 
   metadata_options {
     http_tokens = "required"
+  }
+
+  user_data = <<-USERDATA
+    #!/bin/bash
+    dnf install -y docker git
+    systemctl enable --now docker
+    usermod -aG docker ec2-user
+    curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+  USERDATA
+
+  lifecycle {
+    ignore_changes = [ami]
   }
 
   tags = {

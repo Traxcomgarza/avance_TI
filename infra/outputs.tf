@@ -7,7 +7,7 @@ output "rds_port" {
 }
 
 output "s3_bucket_name" {
-  value = aws_s3_bucket.app.id
+  value = aws_s3_bucket.app.bucket
 }
 
 output "qa_public_ip" {
