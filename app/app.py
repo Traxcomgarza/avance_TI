@@ -9,6 +9,7 @@ import hashlib
 import redis
 from flask import Flask, jsonify, redirect, render_template, request, session, url_for
 from models import Follow, Like, Post, User, db
+from buscar_publicaciones import buscar_bp
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
@@ -19,6 +20,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+app.register_blueprint(buscar_bp)
 
 with app.app_context():
     db.create_all()
