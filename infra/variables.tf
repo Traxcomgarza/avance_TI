@@ -33,11 +33,6 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "app_instance_sg_id" {
-  description = "Security Group de tu instancia EC2 (para permitir acceso a RDS solo desde ahí)"
-  type        = string
-}
-
 variable "vpc_id" {
   description = "VPC donde vive tu instancia EC2 (AWS Academy suele tener una default)"
   type        = string
@@ -46,4 +41,15 @@ variable "vpc_id" {
 variable "subnet_ids" {
   description = "Al menos 2 subnets en distintas AZs para el subnet group de RDS"
   type        = list(string)
+}
+
+variable "instance_type" {
+  description = "Tipo de instancia EC2 para QA y Producción"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "key_name" {
+  description = "Key pair para SSH (en AWS Academy normalmente se llama vockey)"
+  type        = string
 }
