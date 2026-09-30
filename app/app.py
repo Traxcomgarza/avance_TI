@@ -268,6 +268,26 @@ def buscar_usuarios():
         [{"username": u.username, "is_following": u.id in following_ids} for u in all_users]
     )
 
+
+@app.route("/publicaciones/buscar_contenido")
+@login_required
+def buscar_contenido():
+    q = request.args.get("q", "").strip()
+    user_id = session["user_id"]
+    followed_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=user_id).all()]
+    followed_ids.append(user_id)
+
+    query = Post.query.filter(Post.user_id.in_(followed_ids))
+    if q:
+        query = query.filter(Post.content.ilike(f"%{q}%"))
+    posts = query.order_by(Post.created_at.desc()).limit(20).all()
+
+    posts_data = [p.to_dict() for p in posts]
+    for p in posts_data:
+        p["image_url"] = presigned_url(p.get("image_key"))
+
+    return jsonify(posts_data)
+
 def _current_username():
     user = User.query.get(session.get("user_id"))
     return user.username if user else None
