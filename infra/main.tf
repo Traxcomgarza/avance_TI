@@ -150,7 +150,8 @@ resource "aws_instance" "qa" {
   subnet_id              = data.aws_subnets.default.ids[0]
 
   root_block_device {
-    encrypted = true
+    encrypted   = true
+    volume_size = 20
   }
 
   metadata_options {
@@ -184,7 +185,8 @@ resource "aws_instance" "produccion" {
   subnet_id              = data.aws_subnets.default.ids[0]
 
   root_block_device {
-    encrypted = true
+    encrypted   = true
+    volume_size = 20
   }
 
   metadata_options {
