@@ -14,7 +14,7 @@ from buscar_publicaciones import buscar_bp
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ["SECRET_KEY"]
 app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
+    f"postgresql+psycopg2://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}"
     f"@{os.environ['DB_HOST']}:{os.environ.get('DB_PORT', '5432')}/{os.environ['DB_NAME']}"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
